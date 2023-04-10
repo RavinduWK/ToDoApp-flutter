@@ -3,20 +3,33 @@ import '../model/todo.dart';
 
 import '../constants/colors.dart';
 
-class ToDoItem extends StatelessWidget {
-  final ToDo todo;
-  final onToDoChanged;
-  final onDeleteItem;
+class TodoItem extends StatefulWidget {
+  final int id;
+  final String todoText;
+  bool isDone;
+  final Function insertFunction;
+  final Function deleteFunction;
 
-  const ToDoItem(
+  TodoItem(
       {Key? key,
-      required this.todo,
-      required this.onToDoChanged,
-      required this.onDeleteItem})
+      required this.id,
+      required this.todoText,
+      required this.isDone,
+      required this.insertFunction,
+      required this.deleteFunction})
       : super(key: key);
 
   @override
+  State<TodoItem> createState() => _TodoItemState();
+}
+
+class _TodoItemState extends State<TodoItem> {
+  @override
   Widget build(BuildContext context) {
+    // local todo
+    var anotherTodo =
+        ToDo(id: widget.id, todoText: widget.todoText, isDone: widget.isDone);
+
     return Container(
       margin: EdgeInsets.only(bottom: 20),
       child: ListTile(
@@ -26,21 +39,22 @@ class ToDoItem extends StatelessWidget {
         ),
         contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
         tileColor: Colors.white,
-        leading: IconButton(
-          icon: Icon(
-            todo.isDone ? Icons.check_box : Icons.check_box_outline_blank,
-            color: tdBlue,
-          ),
-          onPressed: () {
-            onToDoChanged(todo);
+        leading: Checkbox(
+          value: widget.isDone,
+          onChanged: (bool? value) {
+            setState(() {
+              widget.isDone = value!;
+            });
+            anotherTodo.isDone = value!;
+            widget.insertFunction(anotherTodo);
           },
         ),
         title: Text(
-          todo.todoText!,
+          widget.todoText,
           style: TextStyle(
             fontSize: 16,
             color: tdBlack,
-            decoration: todo.isDone ? TextDecoration.lineThrough : null,
+            decoration: widget.isDone ? TextDecoration.lineThrough : null,
           ),
         ),
         trailing: Container(
@@ -57,7 +71,7 @@ class ToDoItem extends StatelessWidget {
                 iconSize: 18,
                 icon: Icon(Icons.delete),
                 onPressed: () {
-                  onDeleteItem(todo.id);
+                  widget.deleteFunction(anotherTodo);
                 })),
       ),
     );
